@@ -9,17 +9,6 @@ import User from "../models/users";
 
 dotenv.config()
 
-// beforeAll(async () => {
-//   console.log(process.env.TEST_MONGODB_CONNECTION_STRING)
-//   const mong = await mongoose.connect(process.env.TEST_MONGODB_CONNECTION_STRING as string)
-//   console.log("Conneted to database", mong.connection.id)
-// })
-
-// afterAll(async () => {
-//   await User.deleteMany();
-//   await mongoose.connection.close();
-// });
-
 const emails = [
   "meow@meow.com",
   "meow0@meow.com",
