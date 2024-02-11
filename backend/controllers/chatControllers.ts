@@ -2,7 +2,25 @@ import { Request, Response } from "express";
 import Chat from "../models/chat";
 import Chat_User from "../models/chat_users";
 import mongoose from "mongoose";
+import { CheckIfUserIsChatMember } from "../utils/user";
 
+export async function GetChatDetails(req: Request, res: Response) {
+  try {
+    const { chat_id } = req.params
+
+    const checkIfUserIsMember = await CheckIfUserIsChatMember(res.user._id.toString(), chat_id)
+    if (!checkIfUserIsMember)
+      return res.status(403).json({ msg: "Not allowed to send message" });
+
+    const chat = await Chat.findById(chat_id)
+    if (!chat)
+      return res.status(404).json({ msg: "Wrong chat_id" })
+
+    return res.status(200).json({ chat })
+  } catch (err) {
+    return res.status(500).json({ msg: "Internal server error" })
+  }
+}
 
 export async function CreateChat(req: Request, res: Response) {
   try {
@@ -45,12 +63,12 @@ export async function CreateChat(req: Request, res: Response) {
 
 export async function GetUserChats(req: Request, res: Response) {
   try {
-    const { limit = 10, skip = 0}: { limit?: number, skip?: number } = req.query
+    const { limit = 10, skip = 0 }: { limit?: number, skip?: number } = req.query
 
     if (!limit || skip === undefined || !res.user) {
       return res.status(400).json({ msg: "Bad Request" })
     }
-    
+
 
     const chatIds = await Chat_User.find({ user_id: res.user._id })
       .sort({ last_seen: -1 })

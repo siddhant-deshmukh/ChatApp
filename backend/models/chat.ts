@@ -6,6 +6,7 @@ export interface IChatCreate {
   admins: [Types.ObjectId]
   type: "group" | "personal"
   num_members: number
+  num_msgs: number
 }
 export interface IChat extends IChatCreate {
   _id: Types.ObjectId,
@@ -16,7 +17,8 @@ const chatSchema = new mongoose.Schema<IChat>({
   description: { type: String, required: true, maxLength: 70, minlength: 1 },
   admins: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
   type: { type: String, enum: ["group", "personal"], default: "group", required: true },
-  num_members: { type: Number, required: true }
+  num_members: { type: Number, required: true },
+  num_msgs: { type: Number, default: 0 },
 })
 
 const Chat = mongoose.model<IChat>("Chat", chatSchema);

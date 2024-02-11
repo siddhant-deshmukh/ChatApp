@@ -1,63 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import useWebSocketLite from './websocketHook'
+import { useContext } from 'react';
+import { Spinner } from 'flowbite-react';
 
-// prettify
-const sendTag = (message: string) => <span>&#11014;: {message}</span>;
-const receiveTag = (message: string) => <span>&#11015;: {message}</span>;
+import AppContext from './AppContext';
+import ChatApp from './components/chatApp/ChatApp';
+import AuthComponents from './components/authComponents/AuthComponents';
 
-function App() {
-  const [messagesList, setMessagesList] = useState([
-    <span>Messages will be displayed here</span>
-  ]);
-  const txtRef = useRef(null);
+export default function App() {
+  const { authLoading, user } = useContext(AppContext)
 
-  // use our hook
-  const ws = useWebSocketLite({
-    socketUrl: 'ws://localhost:5000' +  `/demo?token=${user.authToken}`,
-  });
-
-  // receive messages
-  useEffect(() => {
-    if (ws.data) {
-      const { message } = ws.data;
-      setMessagesList((messagesList) =>
-        [].concat(receiveTag(message), messagesList)
-      );
-    }
-  }, [ws.data]);
-
-  // send messages
-  const sendData = () => {
-    const message = txtRef.current.value || '';
-    if (message) {
-      setMessagesList((messagesList) =>
-        [].concat(sendTag(message), messagesList)
-      );
-      ws.send(message);
-    }
-  };
-
-  // a simple form
-  return (
-    <div>
-       <div>Connection State: {ws.readyState ? 'Open' : 'Closed'}</div>
-
-      <div>      
-       <form>
-          <label>Message (string or json)</label>
-          <textarea name='message' rows={4} ref={txtRef} />
-          <input type='button' onClick={sendData} value='Send' />
-        </form>
+  return <div className='flex w-full justify-center'>
+    {
+      authLoading &&
+      <div className='pt-[10%]'>
+        <Spinner aria-label="Extra large spinner example" size="xl" />
       </div>
-
-      <div style={{ maxHeight: 300, overflowY: 'scroll' }}>
-        {messagesList.map((Tag, i) => (
-          <div key={i}>{Tag}</div>
-        ))}
+    }
+    {
+      !authLoading && !user &&
+      <div className='pt-[10%]'>
+        <AuthComponents />
       </div>
-
-    </div>
-  );
+    }
+    {
+      !authLoading && user &&
+      <ChatApp />
+    }
+  </div>
 }
-
-export default App;

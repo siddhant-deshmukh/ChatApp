@@ -12,8 +12,9 @@ var router = express.Router();
 // to send information about user
 router.get('/:chat_id',
   auth,
-  query('limit').optional().isInt(),
-  query('skip').optional().isInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('skip').optional().isInt({ min: 0 }),
+  query('nmsgs').optional().isInt({ min: 0 }),
   validate,
   GetMsgs
 );

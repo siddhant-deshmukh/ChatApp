@@ -3,7 +3,7 @@ import validate from '../middleware/validate';
 
 import { body, query } from 'express-validator';
 import express from 'express'
-import { CreateChat, GetUserChats } from '../controllers/chatControllers';
+import { CreateChat, GetChatDetails, GetUserChats } from '../controllers/chatControllers';
 
 
 var router = express.Router();
@@ -26,6 +26,9 @@ router.post('/',
   CreateChat
 );
 
-
+router.get('/:chat_id',
+  auth,
+  GetChatDetails
+);
 
 export default router
