@@ -34,7 +34,7 @@ export async function AddMember(req: Request, res: Response) {
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      await Promise.all([
+      const [chat_user, _] = await Promise.all([
         await Chat_User.create({
           chat_id,
           user_id,
@@ -45,10 +45,19 @@ export async function AddMember(req: Request, res: Response) {
         })
       ])
 
+      const user = await User.findById(chat_user.user_id, { name: 1 })
+      if (!user) {
+        return undefined
+      }
+      const member = {
+        ...user.toObject(),
+        last_seen: chat_user.last_seen
+      }
+
       await session.commitTransaction()
       await session.endSession()
 
-      return res.status(200).json({ msg: "Successfully added memeber" })
+      return res.status(200).json({ msg: "Successfully added memeber", member })
     } catch (err) {
       await session.abortTransaction()
       await session.endSession()
@@ -65,7 +74,7 @@ export async function GetMembers(req: Request, res: Response) {
     const { limit = 10, skip = 0 }: { limit?: number, skip?: number } = req.query
 
     const members = await Chat_User.find({ chat_id }, { user_id: 1, last_seen: 1 }).limit(limit).skip(skip)
-
+    // console.log(members)
     const usersPromise = members.map(async ({ user_id, last_seen }) => {
       try {
         const user = await User.findById(user_id, { name: 1 })
@@ -81,8 +90,11 @@ export async function GetMembers(req: Request, res: Response) {
         return null
       }
     })
+
+    // console.log("Before promise")
     const users = await Promise.all(usersPromise)
-    return users
+    // console.log("Afer promise", users)
+    return res.status(200).json({ users })
   } catch (err) {
     return res.status(500).json({ msg: "Internal server error" })
   }

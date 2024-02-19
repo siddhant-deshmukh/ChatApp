@@ -47,8 +47,12 @@ export async function PostMsg(req: Request, res: Response) {
 export async function GetMsgs(req: Request, res: Response) {
   try {
     const { chat_id } = req.params
-    const { limit = 10, skip = 0, nmsgs }: { limit?: number, skip?: number, nmsgs?: number } = req.query
-
+    const queryParams: { limit?: string, skip?: string, nmsgs?: string } = req.query
+    const { limit, skip, nmsgs } = {
+      limit: queryParams.limit ? parseInt(queryParams.limit) : 10,
+      skip: queryParams.skip ? parseInt(queryParams.skip) : 0,
+      nmsgs: queryParams.nmsgs ? parseInt(queryParams.nmsgs) : undefined,
+    }
     const checkIfUserIsMember = await CheckIfUserIsChatMember(res.user._id.toString(), chat_id)
     if (!checkIfUserIsMember)
       return res.status(403).json({ msg: "Not allowed to send message" });
@@ -63,6 +67,7 @@ export async function GetMsgs(req: Request, res: Response) {
     session.startTransaction()
 
     try {
+      // console.log(typeof num_msgs, typeof nmsgs, typeof skip, num_msgs - nmsgs + skip)
       const [msgs, _] = await Promise.all([
         await Msg.find({ chat_id })
           .sort({ time: -1 })
@@ -89,4 +94,4 @@ export async function GetMsgs(req: Request, res: Response) {
   } catch (err) {
     return res.status(500).json({ msg: "Internal server error" })
   }
-}
+} 

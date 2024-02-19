@@ -11,6 +11,7 @@ export interface IUser {
 export interface IMember {
   _id: string
   name: string
+  last_seen: number
 }
 
 export interface IChatCreate {
@@ -18,6 +19,7 @@ export interface IChatCreate {
   description: string
 }
 export interface IChatSnippet {
+  id: string
   _id: string
   name: string
 }

@@ -1,15 +1,23 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext } from "react";
+
+import NewChat from "./forms/NewChat";
+import AppContext from "../../AppContext";
 import ChatMsgs from "./ChatMsgs/ChatMsgs";
 import ChatsList from "./ChatsList/ChatsList";
-import AppContext from "../../AppContext";
-import { IChat } from "../../types";
-import axios from "axios";
+
 
 export default function ChatApp() {
-
-
+  const { modals } = useContext(AppContext)
   return (
     <div className="flex w-full h-screen">
+      {
+        modals === "new-chat" &&
+        <NewChat />
+      }
+      {
+        modals === "add-user-in-chat" &&
+        <div></div>
+      }
       <ChatsList />
       <ChatMsgs />
     </div>
