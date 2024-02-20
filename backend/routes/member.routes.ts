@@ -1,11 +1,9 @@
+import express from 'express'
+import { body, query } from 'express-validator';
+
 import auth from '../middleware/auth'
 import validate from '../middleware/validate';
-
-import { body, query } from 'express-validator';
-import express from 'express'
-import { CreateChat, GetUserChats } from '../controllers/chatControllers';
-import { AddMember, GetMembers } from '../controllers/memberControllers';
-import mongoose from 'mongoose';
+import { AddMember, GetMembers } from '../controllers/member.controllers';
 
 
 var router = express.Router();

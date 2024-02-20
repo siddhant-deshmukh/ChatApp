@@ -4,6 +4,7 @@ import Msg from "../models/msg"
 import mongoose from "mongoose"
 import Chat_User from "../models/chat_users"
 import Chat from "../models/chat"
+import { io } from "../app"
 
 export async function PostMsg(req: Request, res: Response) {
   try {
@@ -29,6 +30,12 @@ export async function PostMsg(req: Request, res: Response) {
           $inc: { num_msgs: 1 }
         })
       ])
+
+      console.log("Emit message")
+      io.to(chat_id).emit("new-chat", {
+        chat_id,
+        newMsg,
+      })
 
       await session.commitTransaction()
       await session.endSession()

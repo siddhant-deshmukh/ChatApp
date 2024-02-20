@@ -1,4 +1,4 @@
-import app from "./app"
+import { server } from "./app"
 
 import dotenv from "dotenv"
 import mongoose from "mongoose"
@@ -12,6 +12,6 @@ mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string)
   .catch((err) => { console.error("Unable to connect database", err) })
 
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });

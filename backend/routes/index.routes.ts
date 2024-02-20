@@ -1,10 +1,11 @@
-import auth from '../middleware/auth'
-import validate from '../middleware/validate';
-import { UserLogin, UserRegister } from '../controllers/authController';
-
 import dotenv from 'dotenv';
 import { body } from 'express-validator';
 import express, { NextFunction, Request, Response } from 'express'
+
+import auth from '../middleware/auth'
+import validate from '../middleware/validate';
+import { UserLogin, UserRegister } from '../controllers/auth.controller';
+
 
 dotenv.config();
 var router = express.Router();

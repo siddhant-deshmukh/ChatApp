@@ -1,10 +1,10 @@
+import express from 'express'
+import { body, query } from 'express-validator';
+
 import auth from '../middleware/auth'
 import validate from '../middleware/validate';
+import { GetMsgs, PostMsg } from '../controllers/msgs.controller';
 
-import { body, query } from 'express-validator';
-import express from 'express'
-import { CreateChat, GetUserChats } from '../controllers/chatControllers';
-import { GetMsgs, PostMsg } from '../controllers/msgsController';
 
 
 var router = express.Router();

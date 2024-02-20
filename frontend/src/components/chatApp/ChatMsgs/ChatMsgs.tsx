@@ -7,6 +7,7 @@ import { IChat, IMember, IMsg } from "../../../types";
 import AppContext from "../../../AppContext";
 import SelectedChatInfo from "./SelectedChatInfo";
 import MemberModal from "./MemberModal";
+import socket from "../../../socket";
 
 const msgLimit = 10
 
@@ -126,6 +127,23 @@ export default function ChatMsgs() {
         observer?.unobserve(chatListTopElemRef.current);
     }
   }, [selectedChat, fetchMsgs, setChatInfo])
+
+  useEffect(() => {
+    console.log("In here", selectedChat)
+    if (socket.connected && selectedChat) {
+      console.log(socket.connected , "Connecting")
+      console.log("Joining room", selectedChat)
+      socket.emit("join-r", selectedChat)
+    } 
+
+    socket.on("room-status", (res)=>{
+      console.log("room status", res)
+    })
+
+    return ()=>{
+      socket.off("room-status")
+    }
+  }, [selectedChat])
 
   return (
     <div className={`flex relative flex-col h-full w-full ${!modal?'pr-0':'pr-0 xl:pr-[380px]'}`}>
