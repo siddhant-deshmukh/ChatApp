@@ -42,11 +42,11 @@ io.on("connection", (socket) => {
   //   }
   // })
   socket.on("join-r", async (chat_id) => {
-    console.log("Here", chat_id, user_id)
+    // console.log("Here", chat_id, user_id)
     if (!socket.rooms.has(chat_id) && user_id) {
       const isAutherizedToEdit = await CheckIfUserisChatMember(chat_id, user_id)
       if (isAutherizedToEdit) {
-        console.log("joined")
+        // console.log("joined")
         socket.join(chat_id)
         socket.to(socket.id).emit("room-status", {
           chat_id,

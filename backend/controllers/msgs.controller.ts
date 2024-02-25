@@ -1,10 +1,11 @@
-import { Request, Response } from "express"
-import { CheckIfUserIsChatMember } from "../utils/user"
-import Msg from "../models/msg"
 import mongoose from "mongoose"
-import Chat_User from "../models/chat_users"
-import Chat from "../models/chat"
+import { Request, Response } from "express"
+
 import { io } from "../app"
+import Msg from "../models/msg"
+import Chat from "../models/chat"
+import Chat_User from "../models/chat_users"
+import { CheckIfUserIsChatMember } from "../utils/user"
 
 export async function PostMsg(req: Request, res: Response) {
   try {
@@ -32,7 +33,7 @@ export async function PostMsg(req: Request, res: Response) {
       ])
 
       console.log("Emit message")
-      io.to(chat_id).emit("new-chat", {
+      io.to(chat_id).emit("new-msg", {
         chat_id,
         newMsg,
       })

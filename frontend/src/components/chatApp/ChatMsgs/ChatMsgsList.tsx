@@ -10,18 +10,35 @@ export default function ChatMsgList({ msgs, msgLoding, chatMembersInfo, chatMsgL
   chatListPrevHeightRef: React.MutableRefObject<number | null>
   chatMsgListRef: React.MutableRefObject<HTMLDivElement | null>
   chatListTopElemRef: React.MutableRefObject<HTMLDivElement | null>
-  chatListUpdateTypeRef: React.MutableRefObject<"upward" | "backword" | null>
+  chatListUpdateTypeRef: React.MutableRefObject<"upward" | "backword" | "new-msg" | null>
 }) {
 
+  const listBottomRef = useRef<HTMLDivElement | null>(null)
   const chatMsgListContainerRef = useRef<HTMLDivElement | null>(null)
 
+
   useEffect(() => {
-    if (chatListUpdateTypeRef.current === 'upward' && chatMsgListContainerRef.current && chatMsgListRef.current && chatListPrevHeightRef.current != null) {
-      let scrollBy = chatMsgListRef.current.offsetHeight - chatListPrevHeightRef.current
-      // console.log("msgs changed", msgs, "getting ready to scroll", "Scroll to", scrollBy)
-      chatMsgListContainerRef.current.scrollBy({ top: scrollBy, left: 0, behavior: 'instant' })
+    // console.log("List update type", chatListUpdateTypeRef.current)
+    // console.log("List container")
+    if (chatMsgListContainerRef.current && chatMsgListRef.current && chatListPrevHeightRef.current != null) {
+      if (chatListUpdateTypeRef.current === 'upward') {
+
+        let scrollBy = chatMsgListRef.current.offsetHeight - chatListPrevHeightRef.current
+        // console.log("msgs changed", msgs, "getting ready to scroll", "Scroll to", scrollBy)
+        // console.log("Scroll in control!", chatListUpdateTypeRef.current)
+        chatMsgListContainerRef.current.scrollBy({ top: scrollBy, left: 0, behavior: 'instant' })
+      } else {
+        if (listBottomRef.current) {
+          let scrollBy = chatMsgListRef.current.offsetHeight
+          let clientRects = listBottomRef.current.getClientRects()[0]
+          if (clientRects && clientRects.y < 1500) {
+            chatMsgListContainerRef.current.scrollBy({ top: scrollBy, left: 0, behavior: 'smooth' })
+          }
+        }
+      }
     } else {
       // console.log("msgs changed", msgs, "getting ready to scroll", "failed!", chatMsgListContainerRef.current, chatMsgListRef.current, chatListPrevHeightRef.current)
+      // console.log("Scroll not in controll")
     }
     chatListUpdateTypeRef.current = null
   }, [msgs])
@@ -41,7 +58,17 @@ export default function ChatMsgList({ msgs, msgLoding, chatMembersInfo, chatMsgL
           </div>
         </div>
       }
-      <div ref={chatMsgListRef} className="flex flex-col space-y-5 my-5">
+      <div
+        // onClick={() => {
+        //   const clientBRects = listBottomRef.current?.getBoundingClientRect()
+        //   console.log("height", clientBRects?.height, "\ttop", clientBRects?.top, "\ty", clientBRects?.y, clientBRects)
+        //   const clientRects = listBottomRef.current?.getClientRects()[0]
+        //   console.log(chatMsgListRef.current?.scrollHeight)
+        //   console.log("height", clientRects?.height, "\ttop", clientRects?.top, "\ty", clientRects?.y)
+        //   console.log(chatMsgListRef.current?.offsetHeight, chatMsgListContainerRef.current?.scrollHeight, chatMsgListContainerRef.current?.scrollTop)
+        // }}
+        ref={chatMsgListRef}
+        className="flex flex-col space-y-5 my-5">
         {
           msgs.map((msg) => {
             const name = chatMembersInfo.get(msg.author_id)?.name
@@ -51,6 +78,7 @@ export default function ChatMsgList({ msgs, msgLoding, chatMembersInfo, chatMsgL
           })
         }
       </div>
+      <div ref={listBottomRef}></div>
     </div>
   )
 }

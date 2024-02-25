@@ -22,12 +22,12 @@ export default function ChatMsgs() {
   const chatListPrevHeightRef = useRef<number | null>(null) // previsour height of chatList
   const chatMsgListRef = useRef<HTMLDivElement | null>(null) // ref to chatMsgList. //* used to controll scroll of the list e.g going at bottom, stayling at the same position
   const chatListTopElemRef = useRef<HTMLDivElement | null>(null) // ref to element top of list //* used to check if user is at the top of list so that we can fetch new msgs 
-  const chatListUpdateTypeRef = useRef<null | 'upward' | 'backword'>(null) //depending upon how new elements are inserted in list
+  const chatListUpdateTypeRef = useRef<null | 'new-msg' | 'upward' | 'backword'>(null) //depending upon how new elements are inserted in list
 
   const chatIdRef = useRef("") //to check if the chatId selected is changed
 
   const [msgs, setMsgs] = useState<IMsg[]>([])
-  const { selectedChat } = useContext(AppContext)
+  const { selectedChat, user } = useContext(AppContext)
   const [modal, setModal] = useState<boolean>(false)
   const [msgLoding, setMsgLoding] = useState<boolean>(false)
   const [chatInfo, setChatInfo] = useState<IChat | null>(null)
@@ -52,6 +52,7 @@ export default function ChatMsgs() {
           if (data.msgs.length === 0) { //* no new messages
             newMsgNoneRef.current = true
           }
+          chatListUpdateTypeRef.current = 'upward'
           setMsgs((prev) => {
             if (!data.msgs) return prev.slice();
             if (msgsCountRef.current === 0) //chat changed
@@ -60,7 +61,6 @@ export default function ChatMsgs() {
           })
           msgsCountRef.current += data.msgs.length
           // console.log("Message length", msgsCountRef.current, data.msgs)
-          chatListUpdateTypeRef.current = 'upward'
         } else {
           console.log("after fetching msgs", status, data)
         }
@@ -129,24 +129,43 @@ export default function ChatMsgs() {
   }, [selectedChat, fetchMsgs, setChatInfo])
 
   useEffect(() => {
+    // console.log(msgs.map((msg) => { return [msg._id, msg.msg]; }))
+    console.log(chatMsgListRef.current?.offsetHeight, chatMsgListRef.current?.scrollTop)
+  }, [msgs])
+
+  useEffect(() => {
     console.log("In here", selectedChat)
     if (socket.connected && selectedChat) {
-      console.log(socket.connected , "Connecting")
+      console.log(socket.connected, "Connecting")
       console.log("Joining room", selectedChat)
       socket.emit("join-r", selectedChat)
-    } 
+    }
 
-    socket.on("room-status", (res)=>{
+    socket.on("room-status", (res) => {
       console.log("room status", res)
     })
 
-    return ()=>{
+    socket.on('new-msg', (res) => {
+      console.log("New message", res)
+      // setMsgs()
+      const { newMsg, chat_id }: { newMsg: IMsg, chat_id: string } = res
+      setMsgs((prev) => {
+        if (chat_id !== selectedChat || newMsg.author_id === user?._id || prev[prev.length - 1]._id === newMsg._id) {
+          return prev.slice()
+        }
+        chatListUpdateTypeRef.current = "new-msg"
+        return prev.slice().concat([newMsg])
+      })
+    })
+
+    return () => {
       socket.off("room-status")
+      console.log("\n\n!Closing room!\n\n")
     }
-  }, [selectedChat])
+  }, [selectedChat, socket])
 
   return (
-    <div className={`flex relative flex-col h-full w-full ${!modal?'pr-0':'pr-0 xl:pr-[380px]'}`}>
+    <div className={`flex relative flex-col h-full w-full ${!modal ? 'pr-0' : 'pr-0 xl:pr-[380px]'}`}>
       <SelectedChatInfo chatInfo={chatInfo} setModal={setModal} />
       <ChatMsgList
         msgs={msgs}
@@ -157,13 +176,13 @@ export default function ChatMsgs() {
         chatMsgListRef={chatMsgListRef}
         chatListUpdateTypeRef={chatListUpdateTypeRef}
       />
-      <div className={`absolute z-10 ${modal?'block':'hidden'} top-0 right-0 w-full xl:w-auto h-full`}>
-        <MemberModal 
+      <div className={`absolute z-10 ${modal ? 'block' : 'hidden'} top-0 right-0 w-full xl:w-auto h-full`}>
+        <MemberModal
           chatInfo={chatInfo} chatIdRef={chatIdRef}
           selectedChat={selectedChat} setModal={setModal}
           chatMembersInfo={chatMembersInfo} setChatMembersInfo={setChatMembersInfo} />
       </div>
-      <NewChat setMsgs={setMsgs} />
+      <NewChat setMsgs={setMsgs} chatListUpdateTypeRef={chatListUpdateTypeRef} />
     </div>
   )
 }

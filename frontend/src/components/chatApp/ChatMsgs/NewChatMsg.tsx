@@ -3,8 +3,9 @@ import { IMsg } from "../../../types";
 import AppContext from "../../../AppContext";
 import axios from "axios";
 
-export default function NewChatMsg({ setMsgs }: {
+export default function NewChatMsg({ setMsgs, chatListUpdateTypeRef }: {
   setMsgs: React.Dispatch<React.SetStateAction<IMsg[]>>
+  chatListUpdateTypeRef: React.MutableRefObject<"upward" | "backword" | "new-msg" | null>
 }) {
   const { selectedChat } = useContext(AppContext)
   const [newMsg, setNewMsg] = useState<string>("")
@@ -15,6 +16,7 @@ export default function NewChatMsg({ setMsgs }: {
       msg
     }, { withCredentials: true })
       .then(({ data }) => {
+        chatListUpdateTypeRef.current = 'new-msg'
         setMsgs((prev) => {
           return prev.slice().concat([data.msg])
         })
@@ -35,7 +37,9 @@ export default function NewChatMsg({ setMsgs }: {
         onChange={(e) => { setNewMsg(e.target.value) }}
       />
       <button
-        onClick={() => { PostNewChat(selectedChat, newMsg) }}
+        onClick={() => { 
+          PostNewChat(selectedChat, newMsg) 
+        }}
         className="p-2 bg-cyan-100 text-cyan-800 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={4} stroke="currentColor" className="w-6 h-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

@@ -49,10 +49,13 @@ export default function ChatsList() {
             </span>
           </button>
         </div>
-        <ReactSortable list={chatsList} setList={setChatsList}>
+        <ReactSortable 
+          disabled={true} 
+          list={chatsList} 
+          setList={setChatsList} >
           {
             chatsList.map((chatSnippet) => {
-              return <ChatSnippet key={chatSnippet._id} chatSnippet={chatSnippet} />
+              return <ChatSnippet key={chatSnippet._id} chatSnippet={chatSnippet} setChatsList={setChatsList} />
             })
           }
         </ReactSortable>
